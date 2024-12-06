@@ -6,8 +6,10 @@ use App\Middleware\Middleware;
 
 class Route extends Router
 {
+  public static string $lastMethod = "";
 	public static function add(string $method, string $path, callable|string|array $callback): array
 	{
+    static::$lastMethod = $method;
 		return static::$routes[$method][$path] = [
 			"callback" => $callback,
 			"middleware" => null,
@@ -50,8 +52,8 @@ class Route extends Router
 	{
 		$method = array_key_last(static::$routes);
 		$method_array = static::$routes[$method];
-		$uri = array_key_last($method_array);
-		static::$routes[$method][$uri]["middleware"] = $key;
+		$uri = array_key_last(static::$routes[static::$lastMethod]);
+		static::$routes[static::$lastMethod][$uri]["middleware"] = $key;
 		return $this;
 	}
 
@@ -60,8 +62,8 @@ class Route extends Router
 		$class = (new self());
 		[$id, $uri]  = $class->handle_path();
 		$method = Request::method();
-		$class->findOrAbort($uri);
 		Middleware::handle($class->middleware($method, $uri));
+		$class->findOrAbort($uri);
 		echo $class->handle_callback($uri, $id);
 
 		return $class;

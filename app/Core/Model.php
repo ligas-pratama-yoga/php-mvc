@@ -8,9 +8,11 @@ use PDOStatement;
  * @method PDOStatement|bool query()
  * @method static PDOStatement|bool query()
  * @method array all()
- * @method static array all()
+ * @method static array all(?array $params, ?array $condition):, bool|array
  * @method array|bool find()
  * @method static array|bool find()
+ * @method array findOrFail()
+ * @method static array findOrFail()
  * @method array structure()
  * @method static array structure()
  * @method bool create()
@@ -74,8 +76,22 @@ class Model
 	{
 		$params = $params == [] ? $this->params() : $params;
 		$this->_query("select {$params} from {$this->getTable()} where id=?", [$id]);
-		return $this->statement->fetch(\PDO::FETCH_ASSOC);
+    $result = $this->statement->fetch(\PDO::FETCH_ASSOC);
+		return $result;
 	}
+    /**
+     * @return array|bool
+     */
+    public function _findOrFail(int $id, ?array $params = []): array
+  {
+    $result = $this->_find($id, $params);
+
+    if(!$result){
+      return abort();
+    }
+
+    return $result;
+  }
 
 
 	public function _structure(): array

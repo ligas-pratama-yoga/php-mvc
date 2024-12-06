@@ -3,6 +3,7 @@
 namespace App\Middleware;
 
 use App\Core\Request;
+use App\Core\View;
 use Exception;
 
 class Middleware
@@ -14,15 +15,23 @@ class Middleware
 
 	public static function handle(string|null $key)
 	{
+		if (isset($_SESSION["errors"])) {
+			View::$globalVariable = [
+				"errors" => $_SESSION["errors"],
+			];
+			unset($_SESSION["errors"]);
+		} else {
+			View::$globalVariable = [ "errors" => []];
+		}
 		static::handle_token();
+		if ($key == null) {
+			return;
+		}
 		if (!$key) {
 			return;
 		}
 		if (!array_key_exists($key, static::$MAP)) {
 			throw new Exception("Error: Not any Middleware associated with {$key}");
-		}
-		if ($key == null) {
-			return;
 		}
 
 		return (new static::$MAP[$key]())->handle();

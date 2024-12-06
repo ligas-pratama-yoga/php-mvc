@@ -13,8 +13,9 @@ class Validator
 
 		static::findOrException($names);
 		static::handle($values);
-		if (static::$errors !== []) {
-			dd(static::$errors);
+		if (isset($_SESSION["errors"])) {
+			header("Location: " . $_SERVER["HTTP_REFERER"]);
+			exit;
 		}
 	}
 
@@ -35,6 +36,7 @@ class Validator
 			if ($value == "required") {
 				if (Request::body()[$name] == "") {
 					static::$errors[$name] = "Field {$name} is required";
+					$_SESSION["errors"][$name] = static::$errors[$name];
 				}
 			}
 		}
