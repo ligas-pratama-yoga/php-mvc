@@ -31,12 +31,11 @@ class Request
 	{
 		$data = [];
 		$bodies = $_REQUEST;
-		array_pop($bodies);
 		foreach ($bodies as $name => $body) {
-			$data[$name] = $body;
-			if ($name == "_method" || $name == "_token") {
+			if ($name == "_method" || $name == "_token" || $name == "PHPSESSID") {
 				continue;
 			}
+			$data[$name] = $body;
 		}
 		return $data;
 	}

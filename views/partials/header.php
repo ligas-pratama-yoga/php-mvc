@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Dashboard - SB Admin</title>
-        <link href="css/style.min.css" rel="stylesheet" />
-        <link href="css/styles.css" rel="stylesheet" />
-        <script src="js/fontawesome.js" crossorigin="anonymous"></script>
+        <title>Hello</title>
+        <link href="http://localhost:8080/css/style.min.css" rel="stylesheet" />
+        <link href="http://localhost:8080/css/styles.css" rel="stylesheet" />
+        <script src="http://localhost:8080/js/fontawesome.js" crossorigin="anonymous"></script>
     </head>
     <body class="sb-nav-fixed">

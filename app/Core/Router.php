@@ -44,13 +44,13 @@ class Router
 		return call_user_func([(new ($this->callback_class($method, $uri))), $this->callback_action($method, $uri)], $id);
 	}
 
-  public function handle_path(){
-
+	public function handle_path(): array
+	{
 		preg_match('@(\d+)@', Request::uri(), $id);
 		$uri = idWildcard(Request::uri()) ?? Request::uri();
 		return [$id, $uri];
-  }
-  
+	}
+
 	protected function findOrAbort(string $key): null
 	{
 		if (!array_key_exists(array: static::$routes[Request::method()], key: $key)) {
@@ -60,6 +60,6 @@ class Router
 	}
 	protected function middleware(string $method, string $uri): mixed
 	{
-		return static::$routes[$method][$uri]["middleware"];
+		return static::$routes[$method][$uri]["middleware"] ?? null;
 	}
 }

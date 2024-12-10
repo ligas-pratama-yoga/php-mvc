@@ -4,59 +4,53 @@ namespace App\Core;
 
 class View
 {
-	public array $data = [];
-  public static string $viewPath = __DIR__ . "/../../views/";
-  public static string $templatePath = __DIR__ . "/../../views/templates/";
-	public static array $globalVariable = [];
-	/**
-	 * @return string|string[]
-	 */
-	public function render(string $view, ?array $variables = [], ?string $template = "index")
+	public $view_path = __DIR__ . "/../../views/";
+	private $data = [];
+	public static $globalVariable = [];
+	public static function render($view = "", $variables = [], $template = "index")
 	{
-		$contentView = $this->getView($view);
-		$variables = [...$variables, ...$this->data, ...static::$globalVariable];
+		$class = new static();
+		$viewContent = $class->getViewContent($view);
+		$templateContent = $class->getTemplateContent($template) ?? "{{content}}";
+		$variables = [...$class->data, ...static::$globalVariable];
 		ob_start();
 		extract($variables);
-		echo $this->templateExist($template) ?
-		require $this->template($template) : "{{content}}";
-		ob_start();
-    eval("?>".$contentView);
-		$content = ob_get_clean();
+		eval("?>" . $templateContent);
 		$output = ob_get_clean();
-		$viewContent = preg_replace("/@define\([\w,\s']+\)/", "", $content);
-		$result = str_replace("{{content}}", $viewContent, $output);
-
-    file_put_contents(base_path("views/cache/$view.php"), $result);
-    require base_path("views/cache/$view.php");
+		$output = $class->replaceContent($viewContent, $output);
+		ob_start();
+		eval("?>" . $output);
+		return ob_get_clean();
 	}
 
-	public function getView($view)
+
+	public function getViewContent($view)
 	{
-    // Ambil isi dari view file
-    $content = file_get_contents(static::$viewPath . "$view.php");
-    // Set variable yang ada di view
-    $viewVariables = $this->getViewVariable($content);
-    $this->setData($viewVariables);
-    // Hilangkan define directive dari konten
-		$view = preg_replace("/@define\([\w,\s']+\)/", "", $content);
-    // Match semua error directive
-		preg_match_all("/@error\('([\w]+)'\)/", $view, $matchAll);
-    // Replace error directive
-    foreach($matchAll[1] as $key){
-      $view = str_replace("@error('$key')", "<?php if(\$error = \$errors['$key'] ?? false): ?>", $view);
-      $view = str_replace("@enderror", "<?php endif; ?>", $view);
-    }
-    return $view;
+		$content = file_get_contents($this->view_path . "$view.php");
+		$viewVariables = $this->getViewVariable($content);
+		$this->setData($viewVariables);
+		$output = static::handleDirective($content);
+		return $output;
+
+	}
+	public static function getTemplateContent($template = "index")
+	{
+		$file_path = (new static())->view_path . "templates/$template.php";
+		return file_exists($file_path) ? file_get_contents((new static())->view_path . "templates/$template.php") : "{{content}}";
 	}
 
-	public function templateExist(string $template): bool
+	private static function replaceContent($view, $template)
 	{
-		return file_exists(dirname(__DIR__) . "/../views/templates/$template.php");
+		return str_replace("{{content}}", $view, $template);
 	}
 
-	public function template(string $template): string
+	private static function handleDirective($content)
 	{
-		return static::$templatePath . "$template.php";
+		$content = preg_replace("/@define\([\w,\s']+\)/", "", $content);
+		$content = preg_replace("/@error\('([\w]+)'\)/", "<?php if(\$error = \$errors['$1'] ?? false): ?>", $content);
+		$content = preg_replace("/@enderror/", "<?php endif; ?> ", $content);
+		return $content;
+
 	}
 
 	public function getViewVariable($content)
@@ -65,7 +59,7 @@ class View
 		return array_combine($matchAll[1], $matchAll[2]);
 	}
 
-	public function setData($data)
+	public function setData($data): void
 	{
 		if ($this->data !== []) {
 			array_push($this->data, $data);
@@ -73,5 +67,4 @@ class View
 		}
 		$this->data = $data;
 	}
-
 }

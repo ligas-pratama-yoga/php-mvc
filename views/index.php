@@ -1,3 +1,2 @@
-@define('title', 'Hello World')
-<h1><?= $title ?></h1>
-<h1><?= $_SESSION["user"] ?></h1>
+@define('title', 'Hello')
+<h1>Hello World!</h1>

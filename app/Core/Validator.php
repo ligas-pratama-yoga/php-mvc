@@ -6,7 +6,7 @@ use Exception;
 
 class Validator
 {
-	public static array $errors;
+	public static array $errors = [];
 	public static function validate(array $values)
 	{
 		$names = array_keys($values);
@@ -31,12 +31,30 @@ class Validator
 
 	public static function handle($values)
 	{
-
+		//NOTE: Open for refactoring
 		foreach ($values as $name => $value) {
-			if ($value == "required") {
-				if (Request::body()[$name] == "") {
-					static::$errors[$name] = "Field {$name} is required";
-					$_SESSION["errors"][$name] = static::$errors[$name];
+			if (is_array($value)) {
+				foreach ($value as $part) {
+					if (isset(static::$errors[$name])) {
+						continue;
+					}
+					if ($part == "required") {
+						if (Request::body()[$name] == "") {
+							static::$errors[$name] = "Field {$name} is required";
+							$_SESSION["errors"][$name] = static::$errors[$name];
+						}
+					} elseif (preg_match("/min:([\d]+)/", $part, $matched)) {
+						if (strlen(Request::body()[$name]) < (int) $matched[1]) {
+							static::$errors[$name] = "Field {$name} minimal is $matched[1]";
+							$_SESSION["errors"][$name] = static::$errors[$name];
+						}
+					} elseif (preg_match("/max:([\d]+)/", $part, $matched)) {
+						if (strlen(Request::body()[$name]) > (int) $matched[1]) {
+							static::$errors[$name] = "Field {$name} maximal is $matched[1]";
+							$_SESSION["errors"][$name] = static::$errors[$name];
+						}
+					}
+
 				}
 			}
 		}

@@ -15,14 +15,7 @@ class Middleware
 
 	public static function handle(string|null $key)
 	{
-		if (isset($_SESSION["errors"])) {
-			View::$globalVariable = [
-				"errors" => $_SESSION["errors"],
-			];
-			unset($_SESSION["errors"]);
-		} else {
-			View::$globalVariable = [ "errors" => []];
-		}
+		static::handle_errors();
 		static::handle_token();
 		if ($key == null) {
 			return;
@@ -46,5 +39,16 @@ class Middleware
 			}
 		}
 
+	}
+	public static function handle_errors()
+	{
+		if (isset($_SESSION["errors"])) {
+			View::$globalVariable = [
+				"errors" => $_SESSION["errors"],
+			];
+			unset($_SESSION["errors"]);
+		} else {
+			View::$globalVariable = [ "errors" => []];
+		}
 	}
 }

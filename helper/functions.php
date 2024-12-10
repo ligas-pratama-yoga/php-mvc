@@ -25,7 +25,7 @@ function view(string $name, ?array $variables = [], ?string $template = "index")
 function abort(int $status = 404)
 {
 	http_response_code($status);
-	echo "<h1>Page not found</h1>";
+	echo "<h1>$status</h1>";
 	exit;
 }
 function paramToRegex($string, $uri)
